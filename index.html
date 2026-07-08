@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #f8fafc;
-            --bg-card: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --bg-primary: #09090b;
+            --bg-card: #141417;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --border-color: #27272a;
+            --border-hover: #3f3f46;
             --radius: 12px;
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.1);
         }
 
         * {
@@ -32,59 +32,61 @@
             background-color: var(--bg-primary);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 60px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            letter-spacing: -0.01em;
         }
 
         .container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
         }
 
-        /* Header Architecture */
         header {
-            margin-bottom: 40px;
+            margin-bottom: 48px;
             text-align: center;
         }
 
         header h1 {
-            font-size: 2.25rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            letter-spacing: -0.05em;
-            margin-bottom: 8px;
-            color: var(--text-main);
+            letter-spacing: -0.04em;
+            margin-bottom: 12px;
+            background: linear-gradient(to bottom right, #ffffff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         header p {
             color: var(--text-muted);
-            font-size: 1.05rem;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        /* Search Interface */
         .search-wrapper {
             background: var(--bg-card);
-            padding: 8px;
+            padding: 6px;
             border-radius: var(--radius);
-            box-shadow: var(--shadow-md);
             display: flex;
             gap: 8px;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
             border: 1px solid var(--border-color);
-            transition: focus-within 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .search-wrapper:focus-within {
             border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            box-shadow: var(--shadow-glow);
         }
 
         .search-input {
             flex: 1;
             border: none;
             outline: none;
-            padding: 14px 16px;
+            padding: 14px 18px;
             font-size: 1rem;
             font-family: inherit;
             color: var(--text-main);
@@ -92,26 +94,26 @@
         }
 
         .search-input::placeholder {
-            color: var(--text-muted);
+            color: #52525b;
         }
 
         .search-btn {
-            background-color: var(--accent);
-            color: white;
+            background-color: var(--text-main);
+            color: var(--bg-primary);
             border: none;
             padding: 0 28px;
             border-radius: calc(var(--radius) - 4px);
             font-size: 0.95rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .search-btn:hover {
-            background-color: var(--accent-hover);
+            background-color: #ffffff;
+            transform: translateY(-1px);
         }
 
-        /* Feedback States */
         .loader {
             display: none;
             text-align: center;
@@ -122,24 +124,23 @@
         }
 
         .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid var(--border-color);
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border-color);
             border-top-color: var(--accent);
             border-radius: 50%;
-            margin: 0 auto 12px auto;
-            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px auto;
+            animation: spin 0.6s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Results Architecture */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 32px;
             opacity: 1;
             transition: opacity 0.3s ease;
         }
@@ -154,76 +155,81 @@
             background: var(--bg-card);
             border-radius: var(--radius);
             border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-            padding: 28px;
+            padding: 32px;
         }
 
         .panel-header {
-            font-size: 1.15rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
         }
 
         .panel-header span {
-            font-size: 0.85rem;
-            background: #eff6ff;
-            color: var(--accent);
+            font-size: 0.75rem;
+            background: #1e3a8a;
+            color: #93c5fd;
             padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 500;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .resource-list {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
         .card-item {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            padding: 12px;
+            gap: 8px;
+            padding: 16px;
             border-radius: 8px;
-            transition: background-color 0.2s ease;
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.2s ease;
         }
 
         .card-item:hover {
-            background-color: #f8fafc;
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-hover);
+            transform: translateX(4px);
         }
 
         .card-title-link {
             color: var(--text-main);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 1.05rem;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            transition: color 0.2s ease;
+            gap: 6px;
+            transition: color 0.15s ease;
         }
 
         .card-title-link:hover {
-            color: var(--accent);
+            color: var(--accent-hover);
         }
 
         .card-desc {
             font-size: 0.9rem;
             color: var(--text-muted);
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .meta-tag {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--text-muted);
+            color: var(--accent-hover);
             font-weight: 600;
             margin-top: 4px;
         }
@@ -248,31 +254,34 @@
         </div>
 
         <main class="dashboard-grid" id="dashboardView">
-            <!-- Curriculum Section -->
             <section class="panel">
                 <h2 class="panel-header">Structured Curricula <span>Top 5 Sources</span></h2>
                 <ul class="resource-list" id="curriculumOutput">
-                    <!-- Dynamic injection -->
-                </ul>
+                    </ul>
             </section>
             
-            <!-- Technical Challenges Section -->
             <section class="panel">
                 <h2 class="panel-header">Practical Implementations <span>Code Labs</span></h2>
                 <ul class="resource-list" id="challengesOutput">
-                    <!-- Dynamic injection -->
-                </ul>
+                    </ul>
             </section>
         </main>
     </div>
 
     <script>
-        // Inject your secure Google AI Studio Gemini API key here
-        const GEMINI_API_KEY = "AQ.Ab8RN6L6UZwLUhJ_Hp-jlPIOES8XJofsZehsPeVtiQuTDTZBBA"; 
+        // CRITICAL SECURITY NOTE: Place your brand-new, secure API key here.
+        // Never push this file to GitHub or share it with anyone with your key exposed.
+        const GEMINI_API_KEY = "AQ.Ab8RN6IRBa9ZhRkBGklkaUZr_2qgl-eC-pnLRQ11oFHShSes0w"; 
 
         async function executeQuery() {
             const query = document.getElementById('queryInput').value.trim();
             if (!query) return;
+
+            // Simple alert fallback if the user forgets to provision a key
+            if (GEMINI_API_KEY === "YOUR_NEW_GEMINI_API_KEY_HERE") {
+                alert("Configuration Required: Please insert your new Gemini API key into the script block.");
+                return;
+            }
 
             const loaderState = document.getElementById('loaderState');
             const dashboardView = document.getElementById('dashboardView');
@@ -281,7 +290,7 @@
 
             // Reset dashboard state
             loaderState.style.display = 'block';
-            dashboardView.style.opacity = '0.3';
+            dashboardView.style.opacity = '0.1';
             curriculumOutput.innerHTML = '';
             challengesOutput.innerHTML = '';
 
@@ -310,7 +319,6 @@
                 const rawData = await response.json();
                 let cleanText = rawData.candidates[0].content.parts[0].text;
                 
-                // Safety regex logic to strip unexpected AI formatting enclosures
                 cleanText = cleanText.replace(/```json|```/g, "").trim(); 
                 
                 const dataset = JSON.parse(cleanText);
@@ -335,7 +343,7 @@
 
             } catch (err) {
                 console.error("Pipeline breakdown: ", err);
-                alert("An error occurred executing your request. Please ensure your API key configuration is active.");
+                alert("An error occurred executing your request. Check the browser console.");
             } finally {
                 loaderState.style.display = 'none';
                 dashboardView.style.opacity = '1';
