@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Resource Finder</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; background-color: #f4f6f9; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        .loading { display: none; font-style: italic; color: #666; margin-bottom: 10px; }
+        .results-container { display: flex; gap: 20px; }
+        .column { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h3 { border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; }
+        a { color: #007bff; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+        p { margin: 4px 0 0 0; color: #555; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <h2>🎓 Course & Problem Resource Finder</h2>
+    <p style="margin-bottom: 20px; color:#666;">Enter a topic (e.g., "Java Array", "Python Trees") to fetch top courses and practice problems.</p>
+
+    <div class="search-box">
+        <input type="text" id="queryInput" placeholder="e.g., Java Array" onkeypress="if(event.key === 'Enter') fetchResources()">
+        <button onclick="fetchResources()">Search</button>
+    </div>
+
+    <div id="loadingText" class="loading">Thinking and fetching resources...</div>
+
+    <div class="results-container">
+        <div class="column">
+            <h3>📚 Top 5 Courses / Tutorials</h3>
+            <ul id="coursesList"></ul>
+        </div>
+        
+        <div class="column">
+            <h3>💻 Practice Problems</h3>
+            <ul id="problemsList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // CRITICAL: Replace with your actual free Gemini API key
+        const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"; 
+
+        async function fetchResources() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return alert('Please enter a topic!');
+
+            const loadingText = document.getElementById('loadingText');
+            const coursesList = document.getElementById('coursesList');
+            const problemsList = document.getElementById('problemsList');
+
+            // Reset UI
+            loadingText.style.display = 'block';
+            coursesList.innerHTML = '';
+            problemsList.innerHTML = '';
+
+            // We instruct the AI to return data strict JSON format so our code can easily parse it
+            const prompt = `You are an educational assistant API. For the topic "${query}", provide exactly 5 high-quality, real tutorial/course web links (from sources like freeCodeCamp, GeeksforGeeks, W3Schools, Coursera, or YouTube) and exactly 5 practice coding problem links (from LeetCode, HackerRank, CodeChef, or GeeksforGeeks). 
+            Your response MUST be a valid JSON object only, with no markdown code blocks, formatting, or extra text. Use this exact structure:
+            {
+                "courses": [{"title": "Course Name", "url": "https://example.com", "description": "Brief summary"}],
+                "problems": [{"title": "Problem Name", "url": "https://example.com", "platform": "LeetCode"}]
+            }`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Extract clean text and handle any accidental markdown formatting the AI might add
+                let textResponse = data.candidates[0].content.parts[0].text;
+                textResponse = textResponse.replace(/```json|```/g, "").trim(); 
+                
+                const result = JSON.parse(textResponse);
+
+                // Populate Courses
+                result.courses.forEach(course => {
+                    coursesList.innerHTML += `
+                        <li>
+                            <a href="${course.url}" target="_blank">${course.title}</a>
+                            <p>${course.description}</p>
+                        </li>`;
+                });
+
+                // Populate Problems
+                result.problems.forEach(prob => {
+                    problemsList.innerHTML += `
+                        <li>
+                            <a href="${prob.url}" target="_blank">${prob.title}</a>
+                            <p>Platform: <strong>${prob.platform}</strong></p>
+                        </li>`;
+                });
+
+            } catch (error) {
+                console.error(error);
+                alert('Failed to fetch data. Check your API key or console for errors.');
+            } finally {
+                loadingText.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
