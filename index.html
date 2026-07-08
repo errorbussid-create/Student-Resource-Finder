@@ -256,30 +256,27 @@
         <main class="dashboard-grid" id="dashboardView">
             <section class="panel">
                 <h2 class="panel-header">Structured Curricula <span>Top 5 Sources</span></h2>
-                <ul class="resource-list" id="curriculumOutput">
-                    </ul>
+                <ul class="resource-list" id="curriculumOutput"></ul>
             </section>
             
             <section class="panel">
                 <h2 class="panel-header">Practical Implementations <span>Code Labs</span></h2>
-                <ul class="resource-list" id="challengesOutput">
-                    </ul>
+                <ul class="resource-list" id="challengesOutput"></ul>
             </section>
         </main>
     </div>
 
     <script>
-        // CRITICAL SECURITY NOTE: Place your brand-new, secure API key here.
-        // Never push this file to GitHub or share it with anyone with your key exposed.
+        // Paste your secure Google AI Studio Gemini API key below
         const GEMINI_API_KEY = "AQ.Ab8RN6IRBa9ZhRkBGklkaUZr_2qgl-eC-pnLRQ11oFHShSes0w"; 
 
         async function executeQuery() {
             const query = document.getElementById('queryInput').value.trim();
             if (!query) return;
 
-            // Simple alert fallback if the user forgets to provision a key
-            if (GEMINI_API_KEY === "YOUR_NEW_GEMINI_API_KEY_HERE") {
-                alert("Configuration Required: Please insert your new Gemini API key into the script block.");
+            // FIX: Gracefully evaluate if the user left the string empty or default
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_NEW_GEMINI_API_KEY_HERE") {
+                alert("Configuration Error: Please insert your active Gemini API key inside the script block.");
                 return;
             }
 
@@ -288,7 +285,7 @@
             const curriculumOutput = document.getElementById('curriculumOutput');
             const challengesOutput = document.getElementById('challengesOutput');
 
-            // Reset dashboard state
+            // Reset dashboard state safely
             loaderState.style.display = 'block';
             dashboardView.style.opacity = '0.1';
             curriculumOutput.innerHTML = '';
@@ -314,16 +311,17 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('Network lifecycle failure.');
+                if (!response.ok) throw new Error(`HTTP network exception. Status: ${response.status}`);
 
                 const rawData = await response.json();
                 let cleanText = rawData.candidates[0].content.parts[0].text;
                 
+                // Clean markdown artifacts if the model hallucinates formatting blocks
                 cleanText = cleanText.replace(/```json|```/g, "").trim(); 
                 
                 const dataset = JSON.parse(cleanText);
 
-                // Populate Curricula Panels
+                // Populate Curricula Panels safely via template validation
                 dataset.curriculum.forEach(item => {
                     curriculumOutput.innerHTML += `
                         <li class="card-item">
@@ -342,8 +340,8 @@
                 });
 
             } catch (err) {
-                console.error("Pipeline breakdown: ", err);
-                alert("An error occurred executing your request. Check the browser console.");
+                console.error("Pipeline failure: ", err);
+                alert("An architectural error occurred executing your request. Check the browser developer console details.");
             } finally {
                 loaderState.style.display = 'none';
                 dashboardView.style.opacity = '1';
