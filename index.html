@@ -3,113 +3,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Resource Finder</title>
+    <title>EduStream // Academic Resource Router</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; background-color: #f4f6f9; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #0056b3; }
-        .loading { display: none; font-style: italic; color: #666; margin-bottom: 10px; }
-        .results-container { display: flex; gap: 20px; }
-        .column { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h3 { border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
-        ul { list-style: none; padding: 0; }
-        li { margin-bottom: 15px; }
-        a { color: #007bff; text-decoration: none; font-weight: bold; }
-        a:hover { text-decoration: underline; }
-        p { margin: 4px 0 0 0; color: #555; font-size: 14px; }
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* Header Architecture */
+        header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        /* Search Interface */
+        .search-wrapper {
+            background: var(--bg-card);
+            padding: 8px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            gap: 8px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+            transition: focus-within 0.2s ease;
+        }
+
+        .search-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 14px 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            color: var(--text-main);
+            background: transparent;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0 28px;
+            border-radius: calc(var(--radius) - 4px);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Feedback States */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            margin: 0 auto 12px auto;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Architecture */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        @media (max-width: 980px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            padding: 28px;
+        }
+
+        .panel-header {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-header span {
+            font-size: 0.85rem;
+            background: #eff6ff;
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .resource-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .card-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .card-title-link {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .card-title-link:hover {
+            color: var(--accent);
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .meta-tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
 
-    <h2>🎓 Course & Problem Resource Finder</h2>
-    <p style="margin-bottom: 20px; color:#666;">Enter a topic (e.g., "Java Array", "Python Trees") to fetch top courses and practice problems.</p>
+    <div class="container">
+        <header>
+            <h1>Academic Knowledge Router</h1>
+            <p>Unified ingestion engine for targeted open-access curricula and problem sets</p>
+        </header>
 
-    <div class="search-box">
-        <input type="text" id="queryInput" placeholder="e.g., Java Array" onkeypress="if(event.key === 'Enter') fetchResources()">
-        <button onclick="fetchResources()">Search</button>
-    </div>
-
-    <div id="loadingText" class="loading">Thinking and fetching resources...</div>
-
-    <div class="results-container">
-        <div class="column">
-            <h3>📚 Top 5 Courses / Tutorials</h3>
-            <ul id="coursesList"></ul>
+        <div class="search-wrapper">
+            <input type="text" id="queryInput" class="search-input" placeholder="Enter academic subject or topic (e.g., Java Multi-threading, QuickSort)..." onkeypress="if(event.key === 'Enter') executeQuery()">
+            <button class="search-btn" onclick="executeQuery()">Analyze & Fetch</button>
         </div>
-        
-        <div class="column">
-            <h3>💻 Practice Problems</h3>
-            <ul id="problemsList"></ul>
+
+        <div id="loaderState" class="loader">
+            <div class="spinner"></div>
+            <span>Processing structural request and aggregating links...</span>
         </div>
+
+        <main class="dashboard-grid" id="dashboardView">
+            <!-- Curriculum Section -->
+            <section class="panel">
+                <h2 class="panel-header">Structured Curricula <span>Top 5 Sources</span></h2>
+                <ul class="resource-list" id="curriculumOutput">
+                    <!-- Dynamic injection -->
+                </ul>
+            </section>
+            
+            <!-- Technical Challenges Section -->
+            <section class="panel">
+                <h2 class="panel-header">Practical Implementations <span>Code Labs</span></h2>
+                <ul class="resource-list" id="challengesOutput">
+                    <!-- Dynamic injection -->
+                </ul>
+            </section>
+        </main>
     </div>
 
     <script>
-        // CRITICAL: Replace with your actual free Gemini API key
+        // Inject your secure Google AI Studio Gemini API key here
         const GEMINI_API_KEY = "AQ.Ab8RN6L6UZwLUhJ_Hp-jlPIOES8XJofsZehsPeVtiQuTDTZBBA"; 
 
-        async function fetchResources() {
+        async function executeQuery() {
             const query = document.getElementById('queryInput').value.trim();
-            if (!query) return alert('Please enter a topic!');
+            if (!query) return;
 
-            const loadingText = document.getElementById('loadingText');
-            const coursesList = document.getElementById('coursesList');
-            const problemsList = document.getElementById('problemsList');
+            const loaderState = document.getElementById('loaderState');
+            const dashboardView = document.getElementById('dashboardView');
+            const curriculumOutput = document.getElementById('curriculumOutput');
+            const challengesOutput = document.getElementById('challengesOutput');
 
-            // Reset UI
-            loadingText.style.display = 'block';
-            coursesList.innerHTML = '';
-            problemsList.innerHTML = '';
+            // Reset dashboard state
+            loaderState.style.display = 'block';
+            dashboardView.style.opacity = '0.3';
+            curriculumOutput.innerHTML = '';
+            challengesOutput.innerHTML = '';
 
-            // We instruct the AI to return data strict JSON format so our code can easily parse it
-            const prompt = `You are an educational assistant API. For the topic "${query}", provide exactly 5 high-quality, real tutorial/course web links (from sources like freeCodeCamp, GeeksforGeeks, W3Schools, Coursera, or YouTube) and exactly 5 practice coding problem links (from LeetCode, HackerRank, CodeChef, or GeeksforGeeks). 
-            Your response MUST be a valid JSON object only, with no markdown code blocks, formatting, or extra text. Use this exact structure:
+            const architecturePrompt = `You are an elite academic engine. Curate structured links for the topic: "${query}". 
+            Provide exactly 5 foundational tutorial/course URLs and 5 industry-relevant coding problem URLs.
+            You must return raw, valid JSON only. No formatting strings, no backticks, no markdown blocks. 
+            
+            Format Template:
             {
-                "courses": [{"title": "Course Name", "url": "https://example.com", "description": "Brief summary"}],
-                "problems": [{"title": "Problem Name", "url": "https://example.com", "platform": "LeetCode"}]
+                "curriculum": [{"title": "Course Title", "url": "https://link.com", "snippet": "Targeted takeaway summary."}],
+                "challenges": [{"title": "Problem Title", "url": "https://link.com", "provider": "LeetCode/HackerRank/GitHub"}]
             }`;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
+                        contents: [{ parts: [{ text: architecturePrompt }] }]
                     })
                 });
 
-                const data = await response.json();
-                
-                // Extract clean text and handle any accidental markdown formatting the AI might add
-                let textResponse = data.candidates[0].content.parts[0].text;
-                textResponse = textResponse.replace(/```json|```/g, "").trim(); 
-                
-                const result = JSON.parse(textResponse);
+                if (!response.ok) throw new Error('Network lifecycle failure.');
 
-                // Populate Courses
-                result.courses.forEach(course => {
-                    coursesList.innerHTML += `
-                        <li>
-                            <a href="${course.url}" target="_blank">${course.title}</a>
-                            <p>${course.description}</p>
+                const rawData = await response.json();
+                let cleanText = rawData.candidates[0].content.parts[0].text;
+                
+                // Safety regex logic to strip unexpected AI formatting enclosures
+                cleanText = cleanText.replace(/```json|```/g, "").trim(); 
+                
+                const dataset = JSON.parse(cleanText);
+
+                // Populate Curricula Panels
+                dataset.curriculum.forEach(item => {
+                    curriculumOutput.innerHTML += `
+                        <li class="card-item">
+                            <a href="${item.url}" target="_blank" class="card-title-link">${item.title} ↗</a>
+                            <p class="card-desc">${item.snippet}</p>
                         </li>`;
                 });
 
-                // Populate Problems
-                result.problems.forEach(prob => {
-                    problemsList.innerHTML += `
-                        <li>
-                            <a href="${prob.url}" target="_blank">${prob.title}</a>
-                            <p>Platform: <strong>${prob.platform}</strong></p>
+                // Populate Technical Challenges Panels
+                dataset.challenges.forEach(item => {
+                    challengesOutput.innerHTML += `
+                        <li class="card-item">
+                            <a href="${item.url}" target="_blank" class="card-title-link">${item.title} ↗</a>
+                            <span class="meta-tag">Platform: ${item.provider}</span>
                         </li>`;
                 });
 
-            } catch (error) {
-                console.error(error);
-                alert('Failed to fetch data. Check your API key or console for errors.');
+            } catch (err) {
+                console.error("Pipeline breakdown: ", err);
+                alert("An error occurred executing your request. Please ensure your API key configuration is active.");
             } finally {
-                loadingText.style.display = 'none';
+                loaderState.style.display = 'none';
+                dashboardView.style.opacity = '1';
             }
         }
     </script>
