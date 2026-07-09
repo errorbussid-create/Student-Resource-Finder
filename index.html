@@ -267,7 +267,7 @@
     </div>
 
     <script>
-        // High-fidelity open curriculum database map (Zero API keys required)
+        // Keyless Local Search Database
         const ACADEMIC_DATABASE = {
             "array": {
                 "curriculum": [
@@ -303,29 +303,32 @@
             }
         };
 
-        // Standard fallback registry for non-indexed search keywords
+        // Generates targeted fallback URLs if the subject isn't indexed locally
         function generateDynamicFallback(rawQuery) {
             const query = encodeURIComponent(rawQuery);
             return {
                 "curriculum": [
-                    { "title": `Google Scholar Core: ${rawQuery}`, "url": `https://scholar.google.com/scholar?q=${query}`, "snippet": "Peer-reviewed publications, algorithmic deep-dives, and verified structural theory papers." },
-                    { "title": `GeeksforGeeks Curated Hub: ${rawQuery}`, "url": `https://www.geeksforgeeks.org/search/?q=${query}`, "snippet": "Technical documentation, complexity metrics, code blocks, and target implementation files." },
-                    { "title": `freeCodeCamp Knowledge base: ${rawQuery}`, "url": `https://www.freecodecamp.org/news/search/?query=${query}`, "snippet": "In-depth, open-access development modules and step-by-step contextual blueprints." },
-                    { "title": `YouTube Academic Playlists: ${rawQuery}`, "url": `https://www.youtube.com/results?search_query=${query}+programming+course`, "snippet": "High-fidelity video lectures, system diagrams, and continuous live coding workshops." },
-                    { "title": `MIT OpenCourseWare Archive`, "url": "https://ocw.mit.edu/", "snippet": "Official computational lecture tracks, programming notes, and exam reviews." }
+                    { "title": `Google Scholar Reference Manual: ${rawQuery}`, "url": `https://scholar.google.com/scholar?q=${query}`, "snippet": "Peer-reviewed theoretical frameworks, computing papers, and algorithmic analysis." },
+                    { "title": `GeeksforGeeks Document Hub: ${rawQuery}`, "url": `https://www.geeksforgeeks.org/search/?q=${query}`, "snippet": "Language-specific implementation code blocks, data tracking explanations, and execution metrics." },
+                    { "title": `freeCodeCamp Modules: ${rawQuery}`, "url": `https://www.freecodecamp.org/news/search/?query=${query}`, "snippet": "Open-access learning tracks, step-by-step code blueprints, and practical challenge environments." },
+                    { "title": `YouTube Lectures: ${rawQuery}`, "url": `https://www.youtube.com/results?search_query=${query}+programming+course`, "snippet": "Video walk-throughs, continuous coding exercises, and whiteboard layout logic." },
+                    { "title": "MIT OpenCourseWare Computational Archive", "url": "https://ocw.mit.edu/", "snippet": "Official engineering curricula lecture packages, program files, and course documentation." }
                 ],
                 "challenges": [
-                    { "title": `LeetCode Problem Index: ${rawQuery}`, "url": `https://leetcode.com/problemset/all/?search=${query}`, "provider": "LeetCode" },
-                    { "title": `HackerRank Core Challenge Matrix: ${rawQuery}`, "url": `https://www.hackerrank.com/domains/tutorials/10-days-of-javascript`, "provider": "HackerRank" },
-                    { "title": `CodeChef Implementation Sets: ${rawQuery}`, "url": `https://www.codechef.com/`, "provider": "CodeChef" },
-                    { "title": `GitHub Open Source Lab Tracks`, "url": "https://github.com/", "provider": "GitHub" },
-                    { "title": `Codeforces Target Competitions`, "url": "https://codeforces.com/", "provider": "Codeforces" }
+                    { "title": `LeetCode Problem Matrices: ${rawQuery}`, "url": `https://leetcode.com/problemset/all/?search=${query}`, "provider": "LeetCode" },
+                    { "title": `HackerRank Lab Index: ${rawQuery}`, "url": `https://www.hackerrank.com/domains/tutorials/10-days-of-javascript`, "provider": "HackerRank" },
+                    { "title": `CodeChef Live Arena: ${rawQuery}`, "url": `https://www.codechef.com/`, "provider": "CodeChef" },
+                    { "title": "GitHub Open Repositories", "url": "https://github.com/", "provider": "GitHub" },
+                    { "title": "Codeforces Competition Environment", "url": "https://codeforces.com/", "provider": "Codeforces" }
                 ]
             };
         }
 
         function executeQuery() {
-            const rawInput = document.getElementById('queryInput').value.trim();
+            const queryInput = document.getElementById('queryInput');
+            if (!queryInput) return;
+
+            const rawInput = queryInput.value.trim();
             if (!rawInput) return;
 
             const normalizedQuery = rawInput.toLowerCase();
@@ -334,24 +337,23 @@
             const curriculumOutput = document.getElementById('curriculumOutput');
             const challengesOutput = document.getElementById('challengesOutput');
 
-            // Trigger UI lifecycle animation state
+            // Set loading indicators
             loaderState.style.display = 'block';
             dashboardView.style.opacity = '0.1';
             curriculumOutput.innerHTML = '';
             challengesOutput.innerHTML = '';
 
-            // Artificially create a smooth UI refresh response delay (250ms) to emulate cloud query indexing
+            // Simulate execution latency for clean visual transition states
             setTimeout(() => {
-                // Determine whether to serve primary exact dataset match or compile smart fallbacks
                 let dataset = ACADEMIC_DATABASE[normalizedQuery];
+                
                 if (!dataset) {
-                    // Smart detection fallback logic (e.g., matching 'arrays' or 'quicksort')
                     if (normalizedQuery.includes("array")) dataset = ACADEMIC_DATABASE["array"];
                     else if (normalizedQuery.includes("sort")) dataset = ACADEMIC_DATABASE["sorting"];
                     else dataset = generateDynamicFallback(rawInput);
                 }
 
-                // Render Curricula Elements
+                // Inject Curricula Elements
                 dataset.curriculum.forEach(item => {
                     curriculumOutput.innerHTML += `
                         <li class="card-item">
@@ -360,7 +362,7 @@
                         </li>`;
                 });
 
-                // Render Challenges Elements
+                // Inject Challenges Elements
                 dataset.challenges.forEach(item => {
                     challengesOutput.innerHTML += `
                         <li class="card-item">
@@ -374,7 +376,7 @@
 
                 loaderState.style.display = 'none';
                 dashboardView.style.opacity = '1';
-            }, 250);
+            }, 200);
         }
     </script>
 </body>
