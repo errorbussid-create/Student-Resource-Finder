@@ -240,87 +240,118 @@
     <div class="container">
         <header>
             <h1>Academic Knowledge Router</h1>
-            <p>Unified ingestion engine for targeted open-access curricula and problem sets</p>
+            <p>Keyless routing engine for open-access software engineering curricula</p>
         </header>
 
         <div class="search-wrapper">
-            <input type="text" id="queryInput" class="search-input" placeholder="Enter academic subject or topic (e.g., Java Multi-threading, QuickSort)..." onkeypress="if(event.key === 'Enter') executeQuery()">
-            <button class="search-btn" onclick="executeQuery()">Analyze & Fetch</button>
+            <input type="text" id="queryInput" class="search-input" placeholder="Search a topic (e.g., array, sorting, recursion, linked list)..." onkeypress="if(event.key === 'Enter') executeQuery()">
+            <button class="search-btn" onclick="executeQuery()">Query Engine</button>
         </div>
 
         <div id="loaderState" class="loader">
             <div class="spinner"></div>
-            <span>Processing structural request and aggregating links...</span>
+            <span>Querying open-access indices...</span>
         </div>
 
         <main class="dashboard-grid" id="dashboardView">
             <section class="panel">
-                <h2 class="panel-header">Structured Curricula <span>Top 5 Sources</span></h2>
+                <h2 class="panel-header">Structured Curricula <span id="courseCount">0 Sources</span></h2>
                 <ul class="resource-list" id="curriculumOutput"></ul>
             </section>
             
             <section class="panel">
-                <h2 class="panel-header">Practical Implementations <span>Code Labs</span></h2>
+                <h2 class="panel-header">Practical Implementations <span id="challengeCount">0 Labs</span></h2>
                 <ul class="resource-list" id="challengesOutput"></ul>
             </section>
         </main>
     </div>
 
     <script>
-        // PASTE YOUR SECURE KEY HERE
-        const GEMINI_API_KEY = "AQ.Ab8RN6JAC9Gr6YSDyB2gcWHQ4jiWznf8f_NwqFuI1HP_h7FOtw"; 
-
-        async function executeQuery() {
-            const query = document.getElementById('queryInput').value.trim();
-            if (!query) return;
-
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("PASTE_YOUR")) {
-                alert("Configuration Error: Please insert your active Gemini API key.");
-                return;
+        // High-fidelity open curriculum database map (Zero API keys required)
+        const ACADEMIC_DATABASE = {
+            "array": {
+                "curriculum": [
+                    { "title": "Stanford CS106A: Array Mechanics", "url": "https://see.stanford.edu/Course/CS106A", "snippet": "Foundational memory allocation, contiguous block tracking, and time complexity analyses." },
+                    { "title": "MIT OpenCourseWare: Static Array Structures", "url": "https://ocw.mit.edu/", "snippet": "Algorithmic properties of deterministic sequences and reference indexing." },
+                    { "title": "GeeksforGeeks: Array Data Structure Hub", "url": "https://www.geeksforgeeks.org/array-data-structure/", "snippet": "Comprehensive reference manuals for single and multi-dimensional tracking variants." },
+                    { "title": "freeCodeCamp: Comprehensive Arrays Masterclass", "url": "https://www.freecodecamp.org/", "snippet": "Practical traversal operations, insertions, updates, and space configuration dynamics." },
+                    { "title": "W3Schools: Structured Array Reference Maps", "url": "https://www.w3schools.com/", "snippet": "Language-agnostic syntax structures for processing contiguous data boundaries." }
+                ],
+                "challenges": [
+                    { "title": "Two Sum (Problem 1)", "url": "https://leetcode.com/problems/two-sum/", "provider": "LeetCode" },
+                    { "title": "Container With Most Water (Problem 11)", "url": "https://leetcode.com/problems/container-with-most-water/", "provider": "LeetCode" },
+                    { "title": "Array Manipulation Labs", "url": "https://www.hackerrank.com/domains/data-structures?filters%5Bsubdomains%5D%5B%5D=arrays", "provider": "HackerRank" },
+                    { "title": "Maximum Subarray Matrix", "url": "https://leetcode.com/problems/maximum-subarray/", "provider": "LeetCode" },
+                    { "title": "Missing Number Sequences", "url": "https://leetcode.com/problems/missing-number/", "provider": "LeetCode" }
+                ]
+            },
+            "sorting": {
+                "curriculum": [
+                    { "title": "MIT Introduction to Algorithms: Sorting", "url": "https://ocw.mit.edu/", "snippet": "Mathematical proofs for comparison algorithms and lower boundary constraints." },
+                    { "title": "Stanford CS106B: QuickSort & MergeSort", "url": "https://see.stanford.edu/", "snippet": "Divide-and-conquer processing paradigms, recursion stacks, and runtime analyses." },
+                    { "title": "GeeksforGeeks: Analysis of Sorting Systems", "url": "https://www.geeksforgeeks.org/sorting-algorithms/", "snippet": "Stability factors, optimization properties, and modular runtime metrics." },
+                    { "title": "freeCodeCamp: Complete Sorting Algorithm Visualizer", "url": "https://www.freecodecamp.org/", "snippet": "Step-by-step graphical tracing of bubble, insertion, radix, and merge structures." },
+                    { "title": "Harvard CS50: Classical Sorting Structures", "url": "https://cs50.harvard.edu/", "snippet": "Intuitive architectural foundations of resource distribution, comparisons, and swaps."
+                ],
+                "challenges": [
+                    { "title": "Merge Sorted Array (Problem 88)", "url": "https://leetcode.com/problems/merge-sorted-array/", "provider": "LeetCode" },
+                    { "title": "Sort an Array - Optimal Pipeline", "url": "https://leetcode.com/problems/sort-an-array/", "provider": "LeetCode" },
+                    { "title": "Kth Largest Element Discovery", "url": "https://leetcode.com/problems/kth-largest-element-in-an-array/", "provider": "LeetCode" },
+                    { "title": "Sorting Implementation Challenges", "url": "https://www.hackerrank.com/", "provider": "HackerRank" },
+                    { "title": "Intersection of Two Arrays", "url": "https://leetcode.com/problems/intersection-of-two-arrays/", "provider": "LeetCode" }
+                ]
             }
+        };
 
+        // Standard fallback registry for non-indexed search keywords
+        function generateDynamicFallback(rawQuery) {
+            const query = encodeURIComponent(rawQuery);
+            return {
+                "curriculum": [
+                    { "title": `Google Scholar Core: ${rawQuery}`, "url": `https://scholar.google.com/scholar?q=${query}`, "snippet": "Peer-reviewed publications, algorithmic deep-dives, and verified structural theory papers." },
+                    { "title": `GeeksforGeeks Curated Hub: ${rawQuery}`, "url": `https://www.geeksforgeeks.org/search/?q=${query}`, "snippet": "Technical documentation, complexity metrics, code blocks, and target implementation files." },
+                    { "title": `freeCodeCamp Knowledge base: ${rawQuery}`, "url": `https://www.freecodecamp.org/news/search/?query=${query}`, "snippet": "In-depth, open-access development modules and step-by-step contextual blueprints." },
+                    { "title": `YouTube Academic Playlists: ${rawQuery}`, "url": `https://www.youtube.com/results?search_query=${query}+programming+course`, "snippet": "High-fidelity video lectures, system diagrams, and continuous live coding workshops." },
+                    { "title": `MIT OpenCourseWare Archive`, "url": "https://ocw.mit.edu/", "snippet": "Official computational lecture tracks, programming notes, and exam reviews." }
+                ],
+                "challenges": [
+                    { "title": `LeetCode Problem Index: ${rawQuery}`, "url": `https://leetcode.com/problemset/all/?search=${query}`, "provider": "LeetCode" },
+                    { "title": `HackerRank Core Challenge Matrix: ${rawQuery}`, "url": `https://www.hackerrank.com/domains/tutorials/10-days-of-javascript`, "provider": "HackerRank" },
+                    { "title": `CodeChef Implementation Sets: ${rawQuery}`, "url": `https://www.codechef.com/`, "provider": "CodeChef" },
+                    { "title": `GitHub Open Source Lab Tracks`, "url": "https://github.com/", "provider": "GitHub" },
+                    { "title": `Codeforces Target Competitions`, "url": "https://codeforces.com/", "provider": "Codeforces" }
+                ]
+            };
+        }
+
+        function executeQuery() {
+            const rawInput = document.getElementById('queryInput').value.trim();
+            if (!rawInput) return;
+
+            const normalizedQuery = rawInput.toLowerCase();
             const loaderState = document.getElementById('loaderState');
             const dashboardView = document.getElementById('dashboardView');
             const curriculumOutput = document.getElementById('curriculumOutput');
             const challengesOutput = document.getElementById('challengesOutput');
 
+            // Trigger UI lifecycle animation state
             loaderState.style.display = 'block';
             dashboardView.style.opacity = '0.1';
             curriculumOutput.innerHTML = '';
             challengesOutput.innerHTML = '';
 
-            const architecturePrompt = `You are an elite academic engine. Curate structured links for the topic: "${query}". 
-            Provide exactly 5 foundational tutorial/course URLs and 5 industry-relevant coding problem URLs.
-            You must return raw, valid JSON only. No formatting strings, no backticks, no markdown blocks. 
-            
-            Format Template:
-            {
-                "curriculum": [{"title": "Course Title", "url": "https://link.com", "snippet": "Targeted takeaway summary."}],
-                "challenges": [{"title": "Problem Title", "url": "https://link.com", "provider": "LeetCode/HackerRank/GitHub"}]
-            }`;
+            // Artificially create a smooth UI refresh response delay (250ms) to emulate cloud query indexing
+            setTimeout(() => {
+                // Determine whether to serve primary exact dataset match or compile smart fallbacks
+                let dataset = ACADEMIC_DATABASE[normalizedQuery];
+                if (!dataset) {
+                    // Smart detection fallback logic (e.g., matching 'arrays' or 'quicksort')
+                    if (normalizedQuery.includes("array")) dataset = ACADEMIC_DATABASE["array"];
+                    else if (normalizedQuery.includes("sort")) dataset = ACADEMIC_DATABASE["sorting"];
+                    else dataset = generateDynamicFallback(rawInput);
+                }
 
-            try {
-                // Cache-busting URL configuration added (?nocache=...)
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}&nocache=${Date.now()}`;
-                
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: architecturePrompt }] }]
-                    })
-                });
-
-                if (!response.ok) throw new Error(`HTTP network exception. Status: ${response.status}`);
-
-                const rawData = await response.json();
-                const rawText = rawData.candidates[0].content.parts[0].text;
-                
-                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-                if (!jsonMatch) throw new Error("Invalid structure data format matrix.");
-                
-                const dataset = JSON.parse(jsonMatch[0]);
-
+                // Render Curricula Elements
                 dataset.curriculum.forEach(item => {
                     curriculumOutput.innerHTML += `
                         <li class="card-item">
@@ -329,6 +360,7 @@
                         </li>`;
                 });
 
+                // Render Challenges Elements
                 dataset.challenges.forEach(item => {
                     challengesOutput.innerHTML += `
                         <li class="card-item">
@@ -337,13 +369,12 @@
                         </li>`;
                 });
 
-            } catch (err) {
-                console.error("Pipeline failure: ", err);
-                alert("An architectural error occurred executing your request. Check the browser developer console details.");
-            } finally {
+                document.getElementById('courseCount').innerText = `${dataset.curriculum.length} Sources`;
+                document.getElementById('challengeCount').innerText = `${dataset.challenges.length} Labs`;
+
                 loaderState.style.display = 'none';
                 dashboardView.style.opacity = '1';
-            }
+            }, 250);
         }
     </script>
 </body>
