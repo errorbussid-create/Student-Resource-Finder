@@ -267,16 +267,15 @@
     </div>
 
     <script>
-        // Paste your secure Google AI Studio Gemini API key below
-        const GEMINI_API_KEY = "AQ.Ab8RN6L3LTjIcUb3qvTnjO9dUHYSy-Lj-w9y8RZyYDVlA7exFg"; 
+        // PASTE YOUR SECURE KEY HERE
+        const GEMINI_API_KEY = "AQ.Ab8RN6JAC9Gr6YSDyB2gcWHQ4jiWznf8f_NwqFuI1HP_h7FOtw"; 
 
         async function executeQuery() {
             const query = document.getElementById('queryInput').value.trim();
             if (!query) return;
 
-            // FIX: Gracefully evaluate if the user left the string empty or default
-            if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_NEW_GEMINI_API_KEY_HERE") {
-                alert("Configuration Error: Please insert your active Gemini API key inside the script block.");
+            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("PASTE_YOUR")) {
+                alert("Configuration Error: Please insert your active Gemini API key.");
                 return;
             }
 
@@ -285,7 +284,6 @@
             const curriculumOutput = document.getElementById('curriculumOutput');
             const challengesOutput = document.getElementById('challengesOutput');
 
-            // Reset dashboard state safely
             loaderState.style.display = 'block';
             dashboardView.style.opacity = '0.1';
             curriculumOutput.innerHTML = '';
@@ -302,7 +300,9 @@
             }`;
 
             try {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                // Cache-busting URL configuration added (?nocache=...)
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}&nocache=${Date.now()}`;
+                
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -314,14 +314,13 @@
                 if (!response.ok) throw new Error(`HTTP network exception. Status: ${response.status}`);
 
                 const rawData = await response.json();
-                let cleanText = rawData.candidates[0].content.parts[0].text;
+                const rawText = rawData.candidates[0].content.parts[0].text;
                 
-                // Clean markdown artifacts if the model hallucinates formatting blocks
-                cleanText = cleanText.replace(/```json|```/g, "").trim(); 
+                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) throw new Error("Invalid structure data format matrix.");
                 
-                const dataset = JSON.parse(cleanText);
+                const dataset = JSON.parse(jsonMatch[0]);
 
-                // Populate Curricula Panels safely via template validation
                 dataset.curriculum.forEach(item => {
                     curriculumOutput.innerHTML += `
                         <li class="card-item">
@@ -330,7 +329,6 @@
                         </li>`;
                 });
 
-                // Populate Technical Challenges Panels
                 dataset.challenges.forEach(item => {
                     challengesOutput.innerHTML += `
                         <li class="card-item">
