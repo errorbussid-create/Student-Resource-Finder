@@ -267,7 +267,7 @@
     </div>
 
     <script>
-        // Keyless Local Search Database
+        // Fixed Local Search Database Matrix
         const ACADEMIC_DATABASE = {
             "array": {
                 "curriculum": [
@@ -291,7 +291,7 @@
                     { "title": "Stanford CS106B: QuickSort & MergeSort", "url": "https://see.stanford.edu/", "snippet": "Divide-and-conquer processing paradigms, recursion stacks, and runtime analyses." },
                     { "title": "GeeksforGeeks: Analysis of Sorting Systems", "url": "https://www.geeksforgeeks.org/sorting-algorithms/", "snippet": "Stability factors, optimization properties, and modular runtime metrics." },
                     { "title": "freeCodeCamp: Complete Sorting Algorithm Visualizer", "url": "https://www.freecodecamp.org/", "snippet": "Step-by-step graphical tracing of bubble, insertion, radix, and merge structures." },
-                    { "title": "Harvard CS50: Classical Sorting Structures", "url": "https://cs50.harvard.edu/", "snippet": "Intuitive architectural foundations of resource distribution, comparisons, and swaps."
+                    { "title": "Harvard CS50: Classical Sorting Structures", "url": "https://cs50.harvard.edu/", "snippet": "Intuitive architectural foundations of resource distribution, comparisons, and swaps." }
                 ],
                 "challenges": [
                     { "title": "Merge Sorted Array (Problem 88)", "url": "https://leetcode.com/problems/merge-sorted-array/", "provider": "LeetCode" },
@@ -337,13 +337,12 @@
             const curriculumOutput = document.getElementById('curriculumOutput');
             const challengesOutput = document.getElementById('challengesOutput');
 
-            // Set loading indicators
+            // Set loading state configurations
             loaderState.style.display = 'block';
             dashboardView.style.opacity = '0.1';
             curriculumOutput.innerHTML = '';
             challengesOutput.innerHTML = '';
 
-            // Simulate execution latency for clean visual transition states
             setTimeout(() => {
                 let dataset = ACADEMIC_DATABASE[normalizedQuery];
                 
@@ -353,7 +352,7 @@
                     else dataset = generateDynamicFallback(rawInput);
                 }
 
-                // Inject Curricula Elements
+                // Inject Curricula Panels
                 dataset.curriculum.forEach(item => {
                     curriculumOutput.innerHTML += `
                         <li class="card-item">
@@ -362,7 +361,7 @@
                         </li>`;
                 });
 
-                // Inject Challenges Elements
+                // Inject Challenges Panels
                 dataset.challenges.forEach(item => {
                     challengesOutput.innerHTML += `
                         <li class="card-item">
@@ -381,4 +380,3 @@
     </script>
 </body>
 </html>
-
